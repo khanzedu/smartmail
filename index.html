@@ -389,7 +389,7 @@
                 </div>
                 <div class="flex gap-3 pt-2">
                     <button type="button" onclick="closeModalSuratMasuk()" class="flex-1 py-2.5 bg-slate-100 text-slate-700 font-semibold rounded-xl text-sm hover:bg-slate-200 transition">Batal</button>
-                    <button type="submit" class="flex-1 py-2.5 bg-blue-600 text-white font-semibold rounded-xl text-sm hover:bg-blue-700 transition shadow-lg shadow-blue-500/30">Simpan</button>
+                    <button type="submit" id="btnSubmitSm" class="flex-1 py-2.5 bg-blue-600 text-white font-semibold rounded-xl text-sm hover:bg-blue-700 transition shadow-lg shadow-blue-500/30">Simpan</button>
                 </div>
             </form>
         </div>
@@ -427,7 +427,7 @@
                 </div>
                 <div class="flex gap-3 pt-2">
                     <button type="button" onclick="closeModalSuratKeluar()" class="flex-1 py-2.5 bg-slate-100 text-slate-700 font-semibold rounded-xl text-sm hover:bg-slate-200 transition">Batal</button>
-                    <button type="submit" class="flex-1 py-2.5 bg-blue-600 text-white font-semibold rounded-xl text-sm hover:bg-blue-700 transition shadow-lg shadow-blue-500/30">Simpan</button>
+                    <button type="submit" id="btnSubmitSk" class="flex-1 py-2.5 bg-blue-600 text-white font-semibold rounded-xl text-sm hover:bg-blue-700 transition shadow-lg shadow-blue-500/30">Simpan</button>
                 </div>
             </form>
         </div>
@@ -507,10 +507,10 @@
             role: 'admin',
             user: { nama: 'Administrator Utama', role: 'admin' },
             suratMasuk: IS_PREVIEW ? [
-                { id: 1, no_agenda: 'AGD-001', no_surat: '005/KEM-PAN/2026', tanggal_terima: '2026-06-01', pengirim: 'Kemenpan RB', perihal: 'Undangan Rapat Koordinasi Reformasi Birokrasi', file_url: '#' }
+                { id: 1, no_agenda: 'AGD-001', no_surat: '005/KEM-PAN/2026', tanggal_terima: '2026-06-01', pengirim: 'Kemenpan RB', perihal: 'Undangan Rapat Koordinasi Reformasi Birokrasi', file_url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
             ] : [],
             suratKeluar: IS_PREVIEW ? [
-                { id: 1, no_agenda: 'SK-001', no_surat: '400/DINKES/VI/2026', tanggal_keluar: '2026-06-02', tujuan: 'Dinas Kesehatan Kota', perihal: 'Permohonan Data Vaksinasi', file_url: '#' }
+                { id: 1, no_agenda: 'SK-001', no_surat: '400/DINKES/VI/2026', tanggal_keluar: '2026-06-02', tujuan: 'Dinas Kesehatan Kota', perihal: 'Permohonan Data Vaksinasi', file_url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
             ] : [],
             disposisi: IS_PREVIEW ? [
                 { id: 1, surat_id: 1, tujuan_staff: 'Sekretaris Utama', isi_disposisi: 'Segera hadiri dan siapkan bahan paparan.', sifat: 'Penting', status: 'Pending' }
@@ -524,19 +524,7 @@
         let currentRoleTab = 'admin';
         let chartInstance = null;
 
-        // Inisialisasi Tampilan Berdasarkan IS_PREVIEW
-        window.addEventListener('DOMContentLoaded', () => {
-            if (!IS_PREVIEW) {
-                document.getElementById('previewBadge').style.display = 'none';
-                document.getElementById('previewQuickLogin').style.display = 'none';
-                // Kosongkan data demo jika produksi murni
-                appState.suratMasuk = [];
-                appState.suratKeluar = [];
-                appState.disposisi = [];
-                appState.users = [];
-            }
-        });
-
+        // --- SISTEM MODAL & LOGIN ---
         function showModal(title, message) {
             document.getElementById('modalTitle').innerText = title;
             document.getElementById('modalMessage').innerText = message;
@@ -549,25 +537,28 @@
 
         function switchLoginRole(role) {
             currentRoleTab = role;
-            const btnAdmin = document.getElementById('tabAdmin');
-            const btnPegawai = document.getElementById('tabPegawai');
+            const tabAdmin = document.getElementById('tabAdmin');
+            const tabPegawai = document.getElementById('tabPegawai');
             const labelEmail = document.getElementById('labelEmail');
-            
+            const loginUsername = document.getElementById('loginUsername');
+
             if (role === 'admin') {
-                btnAdmin.className = "flex-1 py-2 text-sm font-semibold rounded-xl transition bg-white text-blue-600 shadow-sm";
-                btnPegawai.className = "flex-1 py-2 text-sm font-semibold rounded-xl transition text-slate-600";
+                tabAdmin.className = "flex-1 py-2 text-sm font-semibold rounded-xl transition bg-white text-blue-600 shadow-sm";
+                tabPegawai.className = "flex-1 py-2 text-sm font-semibold rounded-xl transition text-slate-600";
                 labelEmail.innerText = "Email / NIP Admin";
+                loginUsername.placeholder = "admin@smartmail.go.id";
             } else {
-                btnPegawai.className = "flex-1 py-2 text-sm font-semibold rounded-xl transition bg-white text-blue-600 shadow-sm";
-                btnAdmin.className = "flex-1 py-2 text-sm font-semibold rounded-xl transition text-slate-600";
+                tabPegawai.className = "flex-1 py-2 text-sm font-semibold rounded-xl transition bg-white text-blue-600 shadow-sm";
+                tabAdmin.className = "flex-1 py-2 text-sm font-semibold rounded-xl transition text-slate-600";
                 labelEmail.innerText = "NIP Pegawai";
+                loginUsername.placeholder = "199205122015032002";
             }
         }
 
         function fillDemoLogin(role) {
             if (role === 'admin') {
                 switchLoginRole('admin');
-                document.getElementById('loginUsername').value = 'admin';
+                document.getElementById('loginUsername').value = 'admin@smartmail.go.id';
                 document.getElementById('loginPassword').value = 'admin';
             } else {
                 switchLoginRole('pegawai');
@@ -578,110 +569,96 @@
 
         async function handleLogin(e) {
             e.preventDefault();
-            const usernameInput = document.getElementById('loginUsername').value.trim();
-            const passwordInput = document.getElementById('loginPassword').value.trim();
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
 
             if (IS_PREVIEW) {
-                // Mode Preview Login Lokal
-                const found = appState.users.find(u => (u.nip === usernameInput || u.nama.toLowerCase().includes(usernameInput)) && u.password === passwordInput);
-                if (found) {
-                    appState.user = found;
-                    appState.role = found.role;
-                    startAppSession();
+                // Autentikasi Mock Mode Preview
+                const found = appState.users.find(u => (u.nip === username || u.nama.toLowerCase().includes('admin')) && u.password === password);
+                if (found || (username && password)) {
+                    appState.user = found || { nama: username, role: currentRoleTab };
+                    appState.role = appState.user.role;
+                    initAppAfterLogin();
                 } else {
-                    // Fallback demo otomatis jika match demo
-                    appState.user = { nama: currentRoleTab === 'admin' ? 'Administrator Utama' : 'Pegawai Staf', role: currentRoleTab };
-                    appState.role = currentRoleTab;
-                    startAppSession();
+                    showModal("Login Gagal", "Kredensial tidak valid dalam mode preview.");
                 }
                 return;
             }
 
-            // Mode Produksi Supabase
             try {
                 if (currentRoleTab === 'admin') {
-                    const { data, error } = await supabaseClient.auth.signInWithPassword({
-                        email: usernameInput,
-                        password: passwordInput
-                    });
+                    // Login via Supabase Auth
+                    const { data, error } = await supabaseClient.auth.signInWithPassword({ email: username, password: password });
                     if (error) throw error;
                     appState.user = { nama: data.user.email, role: 'admin' };
-                    appState.role = 'admin';
                 } else {
-                    const { data, error } = await supabaseClient
-                        .from('users')
-                        .select('*')
-                        .eq('nip', usernameInput)
-                        .eq('password', passwordInput)
-                        .single();
+                    // Login via tabel users database
+                    const { data, error } = await supabaseClient.from('users').select('*').eq('nip', username).eq('password', password).single();
                     if (error || !data) throw new Error("NIP atau password pegawai salah.");
                     appState.user = data;
-                    appState.role = 'pegawai';
                 }
-                startAppSession();
+                appState.role = appState.user.role;
+                initAppAfterLogin();
             } catch (err) {
-                showModal("Gagal Masuk", err.message || "Periksa kembali kredensial Anda.");
+                showModal("Gagal Masuk", err.message);
             }
         }
 
-        function startAppSession() {
+        function initAppAfterLogin() {
             document.getElementById('loginPage').classList.add('hidden');
             document.getElementById('mainApp').classList.remove('hidden');
-            document.getElementById('userRoleBadge').innerText = appState.role.toUpperCase();
+            document.getElementById('userRoleBadge').innerText = appState.user.role.toUpperCase();
             document.getElementById('userAvatar').innerText = appState.user.nama.substring(0, 2).toUpperCase();
-            
-            // Batasi menu pegawai jika bukan admin
-            if (appState.role === 'pegawai') {
-                document.getElementById('nav-users').style.display = 'none';
+
+            // Sembunyikan menu manajemen user jika bukan admin
+            if (appState.user.role !== 'admin') {
+                const navUsers = document.getElementById('nav-users');
+                if (navUsers) navUsers.style.display = 'none';
             }
 
+            loadAllDataFromSupabase();
             switchTab('dashboard');
-            loadAllData();
         }
 
         function handleLogout() {
             if (!IS_PREVIEW && supabaseClient) {
                 supabaseClient.auth.signOut();
             }
-            document.getElementById('mainApp').classList.add('hidden');
-            document.getElementById('loginPage').classList.remove('hidden');
+            location.reload();
         }
 
-        function switchTab(tabId) {
+        function switchTab(tabName) {
             ['dashboard', 'surat-masuk', 'surat-keluar', 'disposisi', 'users'].forEach(t => {
-                document.getElementById(`tab-content-${t}`).classList.add('hidden');
-                const btn = document.getElementById(`nav-${t}`);
-                if (btn) {
-                    btn.className = "nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition text-slate-600 hover:bg-slate-100";
-                }
+                const el = document.getElementById(`tab-content-${t}`);
+                if (el) el.classList.add('hidden');
             });
 
-            document.getElementById(`tab-content-${tabId}`).classList.remove('hidden');
-            const activeBtn = document.getElementById(`nav-${tabId}`);
-            if (activeBtn) {
-                activeBtn.className = "nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition bg-blue-600 text-white shadow-md shadow-blue-500/20";
+            const activeEl = document.getElementById(`tab-content-${tabName}`);
+            if (activeEl) activeEl.classList.remove('hidden');
+
+            // Update judul halaman
+            const titles = {
+                'dashboard': ['Dashboard', 'Ringkasan statistik dan aktivitas persuratan instansi.'],
+                'surat-masuk': ['Surat Masuk', 'Pencatatan dan arsip surat masuk instansi.'],
+                'surat-keluar': ['Surat Keluar', 'Pencatatan dan arsip surat keluar instansi.'],
+                'disposisi': ['Lembar Disposisi', 'Instruksi pimpinan dan disposisi tugas.'],
+                'users': ['Manajemen Pegawai', 'Kelola daftar pegawai dan hak akses sistem.']
+            };
+            if (titles[tabName]) {
+                document.getElementById('pageTitle').innerText = titles[tabName][0];
+                document.getElementById('pageSubtitle').innerText = titles[tabName][1];
             }
 
-            const titles = {
-                'dashboard': ['Dashboard Utama', 'Ringkasan statistik arsip persuratan instansi.'],
-                'surat-masuk': ['Arsip Surat Masuk', 'Pencatatan dan pengelolaan surat yang diterima instansi.'],
-                'surat-keluar': ['Arsip Surat Keluar', 'Pencatatan dan pengelolaan surat yang dikirim keluar.'],
-                'disposisi': ['Lembar Disposisi', 'Instruksi pimpinan terhadap surat masuk kepada staf terkait.'],
-                'users': ['Manajemen User', 'Kelola akun pegawai dan hak akses sistem.']
-            };
-
-            document.getElementById('pageTitle').innerText = titles[tabId][0];
-            document.getElementById('pageSubtitle').innerText = titles[tabId][1];
-
-            if (tabId === 'dashboard') renderDashboard();
-            if (tabId === 'surat-masuk') renderSuratMasuk();
-            if (tabId === 'surat-keluar') renderSuratKeluar();
-            if (tabId === 'disposisi') renderDisposisi();
-            if (tabId === 'users') renderUsers();
+            // Render konten spesifik tab
+            if (tabName === 'dashboard') renderDashboardStats();
+            if (tabName === 'surat-masuk') renderSuratMasuk();
+            if (tabName === 'surat-keluar') renderSuratKeluar();
+            if (tabName === 'disposisi') renderDisposisi();
+            if (tabName === 'users') renderUsers();
         }
 
-        async function loadAllData() {
-            if (IS_PREVIEW) return;
+        async function loadAllDataFromSupabase() {
+            if (IS_PREVIEW || !supabaseClient) return;
             try {
                 const [sm, sk, disp, usr] = await Promise.all([
                     supabaseClient.from('surat_masuk').select('*'),
@@ -694,12 +671,11 @@
                 if (disp.data) appState.disposisi = disp.data;
                 if (usr.data) appState.users = usr.data;
             } catch (err) {
-                console.error("Gagal memuat data supabase:", err);
+                console.error("Gagal memuat data dari Supabase:", err);
             }
         }
 
-        // --- RENDER DASHBOARD & CHART ---
-        function renderDashboard() {
+        function renderDashboardStats() {
             document.getElementById('statSuratMasuk').innerText = appState.suratMasuk.length;
             document.getElementById('statSuratKeluar').innerText = appState.suratKeluar.length;
             document.getElementById('statDisposisi').innerText = appState.disposisi.length;
@@ -713,12 +689,41 @@
                 data: {
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
                     datasets: [
-                        { label: 'Surat Masuk', data: [2, 5, 3, 8, 4, appState.suratMasuk.length, 0, 0, 0, 0, 0, 0], backgroundColor: '#2563eb', borderRadius: 6 },
-                        { label: 'Surat Keluar', data: [1, 3, 4, 6, 2, appState.suratKeluar.length, 0, 0, 0, 0, 0, 0], backgroundColor: '#10b981', borderRadius: 6 }
+                        { label: 'Surat Masuk', data: [2, 4, 3, 5, 6, appState.suratMasuk.length, 0, 0, 0, 0, 0, 0], backgroundColor: '#2563eb', borderRadius: 6 },
+                        { label: 'Surat Keluar', data: [1, 3, 2, 4, 5, appState.suratKeluar.length, 0, 0, 0, 0, 0, 0], backgroundColor: '#10b981', borderRadius: 6 }
                     ]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                options: { responsive: true, maintainAspectRatio: false }
             });
+        }
+
+        // Helper untuk Upload File ke Supabase Storage Bucket 'surat_files'
+        async function uploadFileToSupabase(fileInputId) {
+            const fileInput = document.getElementById(fileInputId);
+            if (!fileInput || fileInput.files.length === 0) return '#';
+
+            const file = fileInput.files[0];
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+            const filePath = `${fileName}`;
+
+            if (IS_PREVIEW) {
+                return URL.createObjectURL(file);
+            }
+
+            const { data, error } = await supabaseClient.storage
+                .from('surat_files')
+                .upload(filePath, file);
+
+            if (error) {
+                throw new Error("Gagal mengunggah file ke Supabase Storage: " + error.message + ". Pastikan public bucket 'surat_files' sudah dibuat.");
+            }
+
+            const { data: publicURLData } = supabaseClient.storage
+                .from('surat_files')
+                .getPublicUrl(filePath);
+
+            return publicURLData.publicUrl;
         }
 
         // --- SURAT MASUK CRUD ---
@@ -737,13 +742,17 @@
             }
 
             filtered.forEach(item => {
+                const fileButton = item.file_url && item.file_url !== '#' 
+                    ? `<a href="${item.file_url}" target="_blank" class="px-3 py-1 bg-blue-50 text-blue-600 text-xs font-semibold rounded-lg hover:bg-blue-100 transition inline-flex items-center gap-1"><i class="ph ph-file-pdf"></i> Lihat File</a>`
+                    : `<span class="text-xs text-slate-400 italic">Tanpa Lampiran</span>`;
+
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50/80 transition">
                         <td class="p-4 font-semibold text-slate-900">${item.no_agenda}<br><span class="text-xs font-normal text-slate-500">${item.no_surat}</span></td>
                         <td class="p-4 text-slate-600">${item.tanggal_terima}</td>
                         <td class="p-4 text-slate-700 font-medium">${item.pengirim}</td>
                         <td class="p-4 text-slate-600 max-w-xs truncate">${item.perihal}</td>
-                        <td class="p-4"><a href="${item.file_url}" target="_blank" class="px-3 py-1 bg-blue-50 text-blue-600 text-xs font-semibold rounded-lg hover:bg-blue-100 transition inline-flex items-center gap-1"><i class="ph ph-file-pdf"></i> Lihat File</a></td>
+                        <td class="p-4">${fileButton}</td>
                         <td class="p-4 text-center">
                             <button onclick="deleteSuratMasuk(${item.id})" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"><i class="ph ph-trash text-lg"></i></button>
                         </td>
@@ -761,25 +770,41 @@
 
         async function saveSuratMasuk(e) {
             e.preventDefault();
-            const newItem = {
-                id: Date.now(),
-                no_agenda: document.getElementById('smNoAgenda').value,
-                no_surat: document.getElementById('smNoSurat').value,
-                tanggal_terima: document.getElementById('smTglTerima').value,
-                pengirim: document.getElementById('smPengirim').value,
-                perihal: document.getElementById('smPerihal').value,
-                file_url: '#'
-            };
+            const submitBtn = document.getElementById('btnSubmitSm');
+            submitBtn.innerText = "Mengunggah & Menyimpan...";
+            submitBtn.disabled = true;
 
-            if (!IS_PREVIEW && supabaseClient) {
-                const { error } = await supabaseClient.from('surat_masuk').insert([newItem]);
-                if (error) { showModal("Gagal", error.message); return; }
+            try {
+                let uploadedUrl = '#';
+                if (document.getElementById('smFile').files.length > 0) {
+                    uploadedUrl = await uploadFileToSupabase('smFile');
+                }
+
+                const newItem = {
+                    id: Date.now(),
+                    no_agenda: document.getElementById('smNoAgenda').value,
+                    no_surat: document.getElementById('smNoSurat').value,
+                    tanggal_terima: document.getElementById('smTglTerima').value,
+                    pengirim: document.getElementById('smPengirim').value,
+                    perihal: document.getElementById('smPerihal').value,
+                    file_url: uploadedUrl
+                };
+
+                if (!IS_PREVIEW && supabaseClient) {
+                    const { error } = await supabaseClient.from('surat_masuk').insert([newItem]);
+                    if (error) throw error;
+                }
+
+                appState.suratMasuk.push(newItem);
+                closeModalSuratMasuk();
+                renderSuratMasuk();
+                showModal("Sukses", "Surat masuk beserta file berhasil disimpan.");
+            } catch (err) {
+                showModal("Gagal Menyimpan", err.message);
+            } finally {
+                submitBtn.innerText = "Simpan";
+                submitBtn.disabled = false;
             }
-
-            appState.suratMasuk.push(newItem);
-            closeModalSuratMasuk();
-            renderSuratMasuk();
-            showModal("Sukses", "Surat masuk berhasil disimpan.");
         }
 
         async function deleteSuratMasuk(id) {
@@ -807,13 +832,17 @@
             }
 
             filtered.forEach(item => {
+                const fileButton = item.file_url && item.file_url !== '#' 
+                    ? `<a href="${item.file_url}" target="_blank" class="px-3 py-1 bg-emerald-50 text-emerald-600 text-xs font-semibold rounded-lg hover:bg-emerald-100 transition inline-flex items-center gap-1"><i class="ph ph-file-pdf"></i> Lihat File</a>`
+                    : `<span class="text-xs text-slate-400 italic">Tanpa Lampiran</span>`;
+
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50/80 transition">
                         <td class="p-4 font-semibold text-slate-900">${item.no_agenda}<br><span class="text-xs font-normal text-slate-500">${item.no_surat}</span></td>
                         <td class="p-4 text-slate-600">${item.tanggal_keluar}</td>
                         <td class="p-4 text-slate-700 font-medium">${item.tujuan}</td>
                         <td class="p-4 text-slate-600 max-w-xs truncate">${item.perihal}</td>
-                        <td class="p-4"><a href="${item.file_url}" target="_blank" class="px-3 py-1 bg-emerald-50 text-emerald-600 text-xs font-semibold rounded-lg hover:bg-emerald-100 transition inline-flex items-center gap-1"><i class="ph ph-file-pdf"></i> Lihat File</a></td>
+                        <td class="p-4">${fileButton}</td>
                         <td class="p-4 text-center">
                             <button onclick="deleteSuratKeluar(${item.id})" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"><i class="ph ph-trash text-lg"></i></button>
                         </td>
@@ -831,25 +860,41 @@
 
         async function saveSuratKeluar(e) {
             e.preventDefault();
-            const newItem = {
-                id: Date.now(),
-                no_agenda: document.getElementById('skNoAgenda').value,
-                no_surat: document.getElementById('skNoSurat').value,
-                tanggal_keluar: document.getElementById('skTglKeluar').value,
-                tujuan: document.getElementById('skTujuan').value,
-                perihal: document.getElementById('skPerihal').value,
-                file_url: '#'
-            };
+            const submitBtn = document.getElementById('btnSubmitSk');
+            submitBtn.innerText = "Mengunggah & Menyimpan...";
+            submitBtn.disabled = true;
 
-            if (!IS_PREVIEW && supabaseClient) {
-                const { error } = await supabaseClient.from('surat_keluar').insert([newItem]);
-                if (error) { showModal("Gagal", error.message); return; }
+            try {
+                let uploadedUrl = '#';
+                if (document.getElementById('skFile').files.length > 0) {
+                    uploadedUrl = await uploadFileToSupabase('skFile');
+                }
+
+                const newItem = {
+                    id: Date.now(),
+                    no_agenda: document.getElementById('skNoAgenda').value,
+                    no_surat: document.getElementById('skNoSurat').value,
+                    tanggal_keluar: document.getElementById('skTglKeluar').value,
+                    tujuan: document.getElementById('skTujuan').value,
+                    perihal: document.getElementById('skPerihal').value,
+                    file_url: uploadedUrl
+                };
+
+                if (!IS_PREVIEW && supabaseClient) {
+                    const { error } = await supabaseClient.from('surat_keluar').insert([newItem]);
+                    if (error) throw error;
+                }
+
+                appState.suratKeluar.push(newItem);
+                closeModalSuratKeluar();
+                renderSuratKeluar();
+                showModal("Sukses", "Surat keluar beserta file berhasil disimpan.");
+            } catch (err) {
+                showModal("Gagal Menyimpan", err.message);
+            } finally {
+                submitBtn.innerText = "Simpan";
+                submitBtn.disabled = false;
             }
-
-            appState.suratKeluar.push(newItem);
-            closeModalSuratKeluar();
-            renderSuratKeluar();
-            showModal("Sukses", "Surat keluar berhasil disimpan.");
         }
 
         async function deleteSuratKeluar(id) {
